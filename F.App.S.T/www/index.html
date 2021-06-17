@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>F.App.S.T.</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
+    <style>
+        body {
+            margin: 0;
+            background-color: #F2F2F2;
+        }
+    </style>
+    <script src="cordova.js"></script>
+    <script src="src/phaser.min.js"></script>
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script src="node_modules/socket.io-p2p/socketiop2p.min.js"></script>
+    <script src="src/utils/cordova/DecibelMeter.js"></script>
+    <script src="src/utils/FastGyro.js"></script>
+    <script src="src/utils/FastSound.js"></script>
+    <script src="src/net/NetProtocol.js"></script>
+    <script src="src/utils/StateEnum.js"></script>
+    <script src="src/net/GameNetworkEnum.js"></script>
+    <script src="src/net/FASockeT.js"></script>
+    <script src="src/net/PeerSocket.js"></script>
+    <script src="src/utils/EventRegistry.js"></script>
+    <script src="src/utils/BroadcastUtils.js"></script>
+    <script src="src/utils/Broadcaster.js"></script>
+    <script src="src/net/SignalRegistry.js"></script>
+    <script src="src/resources/SplashEnum.js"></script>
+
+    <script src="src/net/EventAdapter.js"></script>
+
+    <script src="src/gamestates/FastStateManager.js"></script>
+
+    <script src="src/gamestates/general/Boot.js"></script>
+    <script src="src/gamestates/general/ColorConnector.js"></script>
+    <script src="src/gamestates/general/SplashScreen.js"></script>
+    <script src="src/gamestates/general/Fallback.js"></script>
+    <script src="src/gamestates/general/StatusScreen.js"></script>
+    <script src="src/gamestates/game/FastFire.js"></script>
+    <script src="src/gamestates/game/FastMeteor.js"></script>
+    <script src="src/gamestates/game/FastSwitch.js"></script>
+    <script src="src/gamestates/game/FastBalistic.js"></script>
+
+</head>
+<script>
+
+(function() {
+		var onDeviceReady = function(){
+    var game = new Phaser.Game(480, 320, Phaser.AUTO, 'game');
+
+    //locking to landscape
+    screen.orientation.lock('landscape');
+
+
+    game.state.add(STATELIST.FAST_BOOT, FastGame.Boot);
+    game.state.add(STATELIST.FAST_COLOR_IO, FastGame.ColorConnector);
+    game.state.add(STATELIST.FAST_FALLBACK, FastGame.Fallback);
+    game.state.add(STATELIST.FAST_STATUS_SCREEN, FastGame.StatusScreen);
+    game.state.add(STATELIST.FAST_SPLASH, FastGame.SplashScreen);
+    game.state.add(STATELIST.FAST_GAME_FIRE, FastGame.FastFire);
+    game.state.add(STATELIST.FAST_GAME_METEOR, FastGame.FastMeteor);
+    game.state.add(STATELIST.FAST_GAME_SWITCH, FastGame.FastSwitch);
+    game.state.add(STATELIST.FAST_GAME_BALLISTIC, FastGame.FastBalistic);
+
+    //NOT STATE MANAGER, NOT YET INITIALISED
+    game.state.start(STATELIST.FAST_BOOT);
+  }
+  document.addEventListener("deviceready", onDeviceReady, false);
+})();
+</script>
+
+</html>

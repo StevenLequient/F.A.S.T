@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Cyber Orb demo</title>
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
+    <link rel="shortcut icon" href="favicon.png" type="image/x-icon" />
+    <style>
+    body {
+        margin: 0;
+        background-color: #F2F2F2;
+    }
+    </style>
+
+<!--
+    <script src="src/index.js"></script>
+-->
+    <script src="node_modules/socket.io-client/dist/socket.io.js"></script>
+
+    <script src="src/phaser.js"></script>
+
+    <script src="src/sound/FastSound.js"></script>
+
+    <script src="src/net/NetProtocol.js"></script>
+    <script src="src/net/FASockeT.js"></script>
+    <script src="src/net/SignalRegistry.js"></script>
+
+    <script src="src/utils/Broadcaster.js"></script>
+    <script src="src/utils/EventRegistry.js"></script>
+
+    <script src="src/states/TitleScreen.js"></script>
+    <script src="src/states/IpPicker.js"></script>
+    <script src="src/states/ColorIOTable.js"></script>
+    <script src="src/states/TutoDemo.js"></script>
+    <script src="src/states/Ship.js"></script>
+
+    <!--
+        <script src="node_modules/tuiomanager/core/TUIOManager.js"></script>
+    -->
+<!--
+    <script src="src/ImageWidget/roomWidget.js"></script>
+-->
+
+    <!--<script src="dist/src/table_gamestates/tableGame.js"></script>
+
+    <script src="src/phaser.min.js"></script>
+-->
+
+<!--
+    <script src="node_modules/socket.io-p2p/socketiop2p.min.js"></script>
+-->
+</head>
+<body>
+<div id='app'></div>
+</body>
+<script>
+
+(function() {
+    console.log('oi');
+/*    const tuioManager = new TUIOManager();
+    tuioManager.start();
+    tuioManager.addWidget(new RoomWidget(0,0,1080,1920,''));*/
+
+    var cfg = {
+        width: 1920,
+        height: 1080,
+        multiTexture: false,
+        parent: 'game',
+        enableDebug: false,
+        transparent: false,
+        antialias: false,
+
+    };
+
+     var game = new Phaser.Game(1920, 1080, Phaser.WEBGL, 'game');
+   // var game = new Phaser.Game(cfg);
+    game.state.add('TitleScreen', FastTable.TitleScreen);
+    game.state.add('IpPicker', FastTable.IpPicker);
+    game.state.add('ColorIOTable', FastTable.ColorIOTable);
+    game.state.add('TutoDemo', FastTable.TutoDemo);
+    game.state.add('Ship', FastTable.Ship);
+    game.state.start('TitleScreen');
+    window.gameO = game;
+
+    /*window.gameF = function (tuioWidget) {
+        console.log(tuioWidget.x);
+        console.log(tuioWidget.onTagCreation);
+
+        // game.add(p);
+    };*/
+})();
+</script>
+
+</html>

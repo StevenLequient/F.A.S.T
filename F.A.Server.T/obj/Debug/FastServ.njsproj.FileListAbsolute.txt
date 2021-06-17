@@ -1,0 +1,3 @@
+C:\Users\T_ki\project\F.A.Server.T\obj\Debug\FastServ.njsprojResolveAssemblyReference.cache
+C:\Users\T_ki\project\F.A.Server.T\obj\Debug\FastServ.njsproj.CoreCompileInputs.cache
+C:\Users\T_ki\project\F.A.Server.T\bin\Microsoft.NodejsTools.WebRole.dll

@@ -1,0 +1,518 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Client Example</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="StyleSheet1.css" >
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <!-- Optional theme -->
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
+
+</head>
+
+<body>
+    <script src="/socket.io/socket.io.js"></script>
+    <!--
+        <script src="http://code.jquery.com/jquery-1.10.1.min.js"></script>
+    -->
+    <script src='https://cdn.rawgit.com/admsev/jquery-play-sound/master/jquery.playSound.js'></script>
+    <script src="jscolor.js"></script>
+    <script src="w3color.js"></script>
+    <nav class="navbar navbar-default">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a class="navbar-brand" href="#">WebSiteName</a>
+            </div>
+            <ul class="nav navbar-nav">
+                <li class="active"><a href="#">Home</a></li>
+                <li><a href="#">ColorIO</a></li>
+                <li><a href="control.html">ControlGame</a></li>
+                <li><a href="#">About</a></li>
+            </ul>
+        </div>
+    </nav>
+    <h1>Communication avec color.io !</h1>
+
+    <div class="row">
+
+        <div class="col-sm-10">
+            <form>
+                <h4>Quoi envoyer?</h4>
+                <p>Sélectionnez une couleur à envoyer:<input class="jscolor" onchange="update(this.jscolor)" value="cc66ff"></p>
+                <p>ou Sélectionnez un int entre 0 et 7 à envoyer</p>
+                <input id="data" type="range" min="0" max="7" value="2" onchange="updateData(this.value)" step="1" />
+             </form>
+            <div>
+                <h4>Sequence</h4>
+                <p>4 char:<input id="dataString" type="text" maxlength="4" onchange="updateSequence(this.value)" /></p>
+                <p>
+                    4 int:
+                    <input id="dataNumber1" type="number" max="255" min="0" onchange="updateSeq2(this)" /><input id="dataNumber2" type="number" max="255" min="0" onchange="updateSeq2(this)" />
+                    <input id="dataNumber3" type="number" max="255" min="0" onchange="updateSeq2(this)" /><input id="dataNumber4" type="number" max="255" min="0" onchange="updateSeq2(this)" />
+                </p>
+
+                <p> Temps par frame (en ms)  <input type="text" id="txt2" value="1000" /> </p><input id="timePerFrame" type="range" min="100" max="2000" value="1000" onchange="updateTime(this.value)" step="50" /></p>
+                <p>
+                    <button onclick="startCount()">Start</button>
+                    <button onclick="stopCount()">Stop</button>Total de couleurs affichées: <input type="text" id="txt" />
+                </p>
+
+
+
+                <p> Couleur envoyée                                                Couleur reçue</p>
+                <div style="overflow:auto;height:150px">
+                    <table id="myTableColor">
+                        <tbody></tbody>
+                    </table>
+                </div>
+
+                <p id="Diffs">Diff</p>
+
+                <div class="row">
+                    <div class="column" id="rect" style="border:1px solid gray; width:50%; height:200px;  ">  </div>
+                    <div class="column" id="rect2" style="border:1px solid green; width:50%; height:200px;"> </div>
+                </div>
+
+            </div>
+
+        </div>
+
+        </div>
+    <div class="col-sm-2" style="background-color:#fff6c6">
+            <h3>Chat</h3>
+            <form action="/" method="post" id="formulaire_chat">
+                <input type="text" name="pseudo"/>
+                <input type="text" name="message" id="message" placeholder="Votre message..." size="50" autofocus />
+                
+                <select>
+                    <option value="FAST">FAST</option>
+                    <option value="COLOR">COLOR</option>
+                </select>
+                <input type="submit" id="envoi_message" value="Envoyer" />
+            </form>
+            <h3>Messages </h3>
+            <table id="myTable">
+                <tbody></tbody>
+            </table>
+        </div>
+
+
+
+    <!-- <div height="400" width="100" id="foo" class="jscolor" value="cc4499" background-col> -->
+    <!-- <div> -->
+    <!-- <button onclick="document.getElementById('foo').jscolor.show()"> -->
+    <!-- Show Picker</button> -->
+    <!-- <button onclick="document.getElementById('foo').jscolor.hide()"> -->
+    <!-- Hide Picker</button> -->
+    <!-- </div> -->
+
+
+    <script>
+        //timer data
+        var c = 0;
+        var t;
+        var timer_is_on = 0;
+
+        // this sequence will be shown
+        var colors = [];
+
+        var timePerFrame = 1000;
+
+        var sendMessage = true;
+        var dataAsInt = [];
+
+        var mess = "SALT";
+
+        function updateSequence(charsss) {
+            sendMessage = true;
+            console.log("Message changed");
+            mess = charsss;
+        }
+
+        function updateSeq2(val) {
+            sendMessage = false;
+            //dataAsInt[0] = document.getElementById("dataNumber").value;
+            //dataAsInt[1] = document.getElementById("dataNumber2" + (i + 1) + "").value;
+            //dataAsInt[2] = document.getElementById("dataNumber3" + (i + 1) + "").value;
+            //dataAsInt[3] = document.getElementById("dataNumber" + (i + 1) + "").value;
+
+            for (var i = 0; i < 4; i++) {
+               
+                dataAsInt[i] = document.getElementById("dataNumber" + (i+1) + "").value;
+                console.log("DAtaasint " + dataAsInt[i]);
+            }
+
+        }
+        // TIMER
+        var line;
+
+        function timedCount() {
+            document.getElementById("txt").value = c;
+            c = c + 1;
+            updateData(colors[c % colors.length]);
+            // update pos
+            var post = c % colors.length;
+            var trrr = $('#myTableColor > tbody > tr:first');
+
+
+            var children = trrr.children();
+            console.log(trrr);
+            console.dir(children);
+
+            for (var i = 0; i < children.length; i++) {
+                if (i == post) {
+                    children[i].className = "selected";
+                }
+                else {
+                    children[i].className = "notselected";
+
+                }
+            }
+
+            t = setTimeout(function () { timedCount() }, timePerFrame);
+        }
+
+        function startCount() {
+            var toEncode = ipToIntArray(mess);
+           
+            if (!sendMessage) {
+
+                toEncode = dataAsInt;
+            }
+            console.log("toEncode");
+            console.log(toEncode);
+
+            encodeIp(toEncode);
+            if (!timer_is_on) {
+                timer_is_on = 1;
+                timedCount();
+            }
+        }
+
+        function stopCount() {
+            clearTimeout(t);
+            timer_is_on = 0;
+        }
+        // END TIMER
+
+        //MATHS
+        function checksum(byteB) {
+            //console.log("check sum bits");
+            var ones = 0;
+            while (byteB != 0) {
+                if (byteB % 2 == 0)
+                    ones++;
+                byteB = byteB >> 1;
+            }
+            //console.log("end bits");
+
+            return ones % 2;
+
+        }
+        function invert(x) {
+            return parseInt(x.toString(2).replace(/[01]/g, function (n) { return 1 - n; }), 2);
+        }
+        function dec2bin(dec) {
+            return (dec >>> 0).toString(2);
+        }
+        function diffColor(color1, color2) {
+            var R = (color1.red - color2.red) * (color1.red - color2.red);
+            var G = (color1.green - color2.green) * (color1.green - color2.green);
+            var B = (color1.blue - color2.blue) * (color1.blue - color2.blue);
+
+            return Math.sqrt(R + G + B);
+        }
+        //RESSOURCES
+        var sounds = ["http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_Hello1.wav", "http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_Hey1.wav", "http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_Listen1.wav", "http://noproblo.dayjo.org/ZeldaSounds/OOT/OOT_Navi_WatchOut1.wav"];
+
+
+        //server ip default to encode
+        var ip = "192.168.1.4";
+        //var ip = "10.212.115.16";
+
+        var socket = io.connect('http://' + ip + ':8080');
+
+        var toEncode = ip;
+        var ip2 = ip;
+
+   
+        // "ABCD" to int[4]
+        function ipToIntArray(ip) {
+            var keystr = [];
+
+            var FastKey = ip.substring(0, 4).split('');
+            // 4 char to 1, 2, 3, 4
+            for (var i = 0; i < FastKey.length ; i++) {
+                keystr[i] = FastKey[i].charCodeAt(0);
+                console.log("char " + keystr[i]);
+            }
+            return keystr;
+        }
+
+        // from ip " 124.162.13.158" to int[4]
+        function generateSequence(keystr) {
+
+            // Take 4 chars
+            var bytesIp = []
+            var ipsS = keystr.split('.', 4);
+
+            for (var i = 0; i < 4; i++) {
+                bytesIp[i]=parseInt(ipsS[i], 10);
+            }
+            return bytesIp;
+        }
+
+        // encode a message as an array of 4 bytes. Message produced: colors in rgb to display
+        // byte[4] -> colors 16
+        function encodeIp(ipsS) {
+           
+            colors[0] = 0;
+            colors[1] = 0;
+            colors[2] = 0;
+            colors[3] = 0;
+
+            console.log("encoding");
+
+            var pos = 4;
+            // 11 00 11 00 0
+            for (var i = 0; i < 4; i++) {
+
+                bytesIp = ipsS[i];
+
+                // 111 00000 => 00000111
+                //console.log('bytesIp' + bytesIp);
+                //console.log('dec2bin' + dec2bin(bytesIp));
+
+                //dec2bin
+                colors[pos] = (bytesIp >> 5) & 7;
+                // 000 111 00 => 00000111
+                console.log(dec2bin(bytesIp >> 2));
+                colors[pos + 1] = (bytesIp >> 2) & 7;
+                //console.log("dd" + dec2bin(colors[pos + 1]));
+
+                // 000 000 111 => 00000 011 checksumbit
+                colors[pos + 2] = (bytesIp) & 3;
+
+                var checksum3Color = checksum(bytesIp);
+                // put checksum  byte
+                colors[pos + 2] = checksum3Color | (colors[pos + 2] << 1);
+                //console.log('one' + colors[pos] + 'two' + colors[pos + 1] + ' tr' + colors[pos + 2]);
+                //console.log('dec2bin ' + dec2bin(colors[pos]) + '    two' + dec2bin(colors[pos + 1]) + '   tr ' + dec2bin(colors[pos + 2]));
+
+
+                pos += 3;
+            }
+
+            encoded = true;
+            var ligne = '';
+
+            function inverseColor(r) {
+                return (r > 128) ? 0 : 255;
+            }
+            //filter by highest bit to display preview
+            for (var i = 0; i < colors.length; i++) {
+
+                var r = ((colors[i] & 1)) * 255;
+                var g = ((colors[i] & 2) >> 1) * 255;
+                var b = ((colors[i] & 4) >> 2) * 255;
+                console.log(colors[i]);
+                console.log(r + " " + g + " " + b);
+                
+
+
+
+                var stringC = "#" + decimalToHex(r, 2) + decimalToHex(g, 2) + decimalToHex(b, 2);
+                var stringC2 = "#" + decimalToHex(inverseColor(r), 2) + decimalToHex(inverseColor(g), 2) + decimalToHex(inverseColor(b), 2);
+
+                ligne += '<td style="background-color:' + stringC + ';color:' + stringC2+ ';text-align: center" width="50px">' + colors[i] + ' </td>';
+                console.log('bg' + stringC);
+            }
+            $('#myTableColor > tbody:last-child').prepend('<tr>' + ligne + '</tr>');
+    }
+     
+
+        
+        // start sequence
+
+        
+        var lastReceivedColor = {
+            red: 0,
+            green: 0,
+            blue: 0,
+            byteO: 0
+        };
+
+        var colorLocal = {
+            red: 0,
+            green: 0,
+            blue: 0,
+            byteO: 0
+        };
+
+
+        // update the div and compare orignial and received from a socket io, display results
+        socket.on('FAST_COLOR', function (message) {
+
+            console.log("FAST_COLOR" + message);
+            lastReceivedColor = JSON.parse(message);
+            
+            var hexColor = rgbToHex(lastReceivedColor);
+            var hexColorInverted = rgbToHex(lastReceivedColor);
+
+            //console.log("hex color" + hexColor);
+
+            document.getElementById('rect2').style.backgroundColor = hexColor;
+            document.getElementById('rect2').innerHTML = '<p sytle="color:' + hexColorInverted+'">' + hexColor +'</p>'
+            console.log("comparing" + lastReceivedColor + " to " + colorLocal);
+            console.dir(lastReceivedColor);
+            console.dir(colorLocal);
+            var diff = diffColor(lastReceivedColor, colorLocal);
+            var diff2 = Math.sqrt((lastReceivedColor.byteO - colorLocal.byteO) << 1);
+            document.getElementById('Diffs').innerHTML = "Color distance:" + diff.toFixed(2) + "    ByteDistance:" + diff2;
+        });
+
+
+
+        //color from picker
+        function update(jscolor) {
+            
+            // 'jscolor' instance can be used as a string
+            document.getElementById('rect').style.backgroundColor = '#' + jscolor
+            var toRbg = jscolor;
+            console.log(toRbg);
+            var jsc = '' + jscolor;
+            var rS = jsc.substring(0, 2);
+            var gS = jsc.substring(2, 4);
+            var bS = jsc.substring(4, 6);
+            colorLocal = {
+                red: parseInt(rS, 16),
+                green: parseInt(gS, 16),
+                blue: parseInt(bS, 16),
+                byteO: 0
+            }
+            console.log('update');
+            console.dir(colorLocal);
+
+        }
+
+        function decimalToHex(d, padding) {
+            var hex = Number(d).toString(16);
+            padding = typeof (padding) === "undefined" || padding === null ? padding = 2 : padding;
+
+            while (hex.length < padding) {
+                hex = "0" + hex;
+            }
+
+            return hex;
+        }
+
+        function rgbToHex(c) {
+            return "#" + decimalToHex(c.red, 2) + decimalToHex(c.green, 2) + decimalToHex(c.blue, 2);
+
+        }
+
+
+        // Update the sequence framerate
+        function updateTime(value) {
+            document.getElementById("txt2").value = value;
+            timePerFrame = value;
+
+        }
+
+        // change the color displayed
+        function updateData(value) {
+        
+
+            // encode the data
+
+            // TODO add textDisplay
+            var r = ((value & 1)) * 255;
+            var g = ((value & 2) >> 1) * 255;
+            var b = ((value & 4) >> 2) * 255;
+
+            colorLocal = {
+                red: r, green: g, blue: b, byteO: parseInt(value, 10)
+            };
+
+            console.log("setting color local: " + r + " " + g + " " + b + "    " + colorLocal.byteO);
+
+            // color as string to display
+            var stringC = rgbToHex(colorLocal);
+            console.log("string c" + stringC);
+
+            //set the color
+            document.getElementById('rect').style.backgroundColor = stringC
+
+            //get the color
+
+        }
+
+        /** CHAT **/
+
+        var pseudo = "BACK";
+        var port = 0;
+
+        function addMessageLocal(message) {
+            $('#myTable > tbody:last-child').prepend('<tr><td style="color:blue">' + pseudo + ': </td><td>' + message + '</td></tr>');
+        }
+
+        function addMessage(message) {
+            $('#myTable > tbody:last-child').prepend('<tr><td>' + message.pseudo + ': </td><td>' + message.message + '</td></tr>');
+            var position = Math.floor((Math.random() * sounds.length));;
+
+            $.playSound(sounds[position]);
+        }
+        function addPseudo(pseudo) {
+            $('#myTable > tbody:last-child').prepend('<tr><td style="color:green"> New client: </td><td>' + pseudo + '</td></tr>');
+        }
+        function delPseudo(pseudo) {
+            $('#myTable > tbody:last-child').prepend('<tr><td style="color:red"> Client quit: </td><td>' + pseudo + '</td></tr>');
+        }
+
+        socket.emit('login', pseudo);
+        socket.on('message', function (message) {
+            console.log('message', message);
+            //alert('Le serveur a un message pour vous : ' + message);
+        })
+        socket.on('portFast', function (message) {
+            port = message;
+            console.log('portFast' + message);
+        })
+        socket.on('message', function (message) {
+            addMessage(message);
+            console.log('receving message' + message);
+        })
+        socket.on('clientConnect', function (message) {
+            console.log('clientConnect' + message);
+            addPseudo(message);
+        });
+        socket.on('clientDisconnect', function (message) {
+            console.log('clientConnect' + message);
+            delPseudo(message);
+        });
+
+        socket.on('serverLog', function (message) {
+            addPseudo(message);
+        });
+        //
+        socket.on('connectTo', function (message) {
+            console.log('connectTo' + message);
+            addPseudo(message);
+            $('#myTable > tbody:last-child').prepend('<tr><td>' + message + ' connected !</td></tr>');
+        });
+
+        $('#formulaire_chat').submit(function () {
+            var message = $('#message').val();
+            socket.emit('message', message); // Transmet le message aux autres
+            addMessageLocal(message);
+
+            $('#message').val('').focus(); // Vide la zone de Chat et remet le focus dessus
+            return false; // Permet de bloquer l'envoi "classique" du formulaire
+        });
+    </script>
+
+</body>
+</html>

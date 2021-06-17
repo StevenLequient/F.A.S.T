@@ -1,0 +1,32 @@
+{
+  "name": "f.a.s.table",
+  "version": "1.0.0",
+  "description": "the fastest table, the fatest table",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NicolasBighetti/F.A.S.Table.git"
+  },
+  "keywords": [
+    "table",
+    "ihm",
+    "game",
+    "fun",
+    "space",
+    "love"
+  ],
+  "author": "Alison Berlioz Nicolas Bighetti Flavian Jacquot Steven Lequient",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NicolasBighetti/F.A.S.Table/issues"
+  },
+  "homepage": "https://github.com/NicolasBighetti/F.A.S.Table#readme",
+  "dependencies": {
+    "socket.io": "^2.0.4",
+    "tuioclient": "git+https://github.com/AtelierIHMTable/TUIOClient.git",
+    "tuiomanager": "git+https://github.com/AtelierIHMTable/TUIOManager.git"
+  }
+}

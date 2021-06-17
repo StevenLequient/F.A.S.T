@@ -1,0 +1,40 @@
+{
+  "name": "f.a.server.t",
+  "version": "1.0.0",
+  "description": "The F.A.S.T server",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NicolasBighetti/F.A.Server.T.git"
+  },
+  "keywords": [
+    "game",
+    "coop",
+    "usability",
+    "dery",
+    "love",
+    "vaporwave",
+    "smarthpone",
+    "tactile",
+    "table",
+    "FTL",
+    "space"
+  ],
+  "author": "Berlioz Alison Bighetti Nicolas Jacquot Flavian Lequient Steven",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NicolasBighetti/F.A.Server.T/issues"
+  },
+  "homepage": "https://github.com/NicolasBighetti/F.A.Server.T#readme",
+  "dependencies": {
+    "express": "^4.16.2",
+    "socket.io": "^2.0.4",
+    "socket.io-p2p": "^2.2.0",
+    "socket.io-p2p-server": "^1.2.0",
+    "tuioclient": "git+https://github.com/AtelierIHMTable/TUIOClient.git",
+    "tuiomanager": "git+https://github.com/AtelierIHMTable/TUIOManager.git"
+  }
+}

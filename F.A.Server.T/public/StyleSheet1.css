@@ -1,0 +1,23 @@
+﻿body {
+    background-color = "#FAFAFA":
+}
+.column {
+    float: left;
+    width: 50%;
+}
+
+/* Clear floats after the columns */
+.row:after {
+    content: "";
+    display: table;
+    clear: both;
+}
+
+.selected{
+    border:solid;
+    border-color: mediumvioletred;
+    border-width: 5px;
+}
+
+.notselected {
+}
